@@ -15,7 +15,7 @@ const AdminPage = () => {
         <div className="flex gap-4 justify-between flex-wrap">
           <UserCard type="student" />
           <UserCard type="teacher" />
-          <UserCard type="parent" />
+          <UserCard type="Fees" />
           <UserCard type="staff" />
         </div>
         {/* middle (charts) */}
@@ -34,6 +34,8 @@ const AdminPage = () => {
         <div className="w-full h-[500px]">
           <FinanceChart/>
         </div>
+          {/* fees graph */}
+          
       </div>
 
       {/* right */}

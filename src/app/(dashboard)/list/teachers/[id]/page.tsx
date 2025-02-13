@@ -32,8 +32,8 @@ const SingleTeacherPage = () => {
                   type="update"
                   data={{
                     id: 1,
-                    username: "deanguerrero",
-                    email: "deanguerrero@gmail.com",
+                    username: "bhushan waghode",
+                    email: "bhushanw@gmail.com",
                     password: "password",
                     firstName: "Dean",
                     lastName: "Guerrero",
