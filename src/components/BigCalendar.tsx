@@ -35,6 +35,6 @@ const BigCalendar = () => {
   );
 }
 
-const BigCalendarNoSSR = dynamic(() => Promise.resolve(BigCalendar), { ssr: false });
+// const BigCalendarNoSSR = dynamic(() => Promise.resolve(BigCalendar), { ssr: false });
 
-export default BigCalendarNoSSR;
+export default BigCalendar;

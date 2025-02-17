@@ -50,7 +50,7 @@ const Pagination = ({ page, count }: { page: number; count: number }) => {
         onClick={() => changePage(page + 1)}
         className="px-4 py-2 rounded-md bg-slate-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Prev
+        Next
       </button>
     </div>
   );

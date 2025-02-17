@@ -1,3 +1,4 @@
+
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
@@ -10,18 +11,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Indices } from "zod";
 
-// type Teacher={
-//     id: number,
-//     teacherID: string,
-//     name: string,
-//     email?: string,
-//     photo: string,
-//     phone: string,
-//     address: string,
-//     classes: string[],
-//     subjects: string[],
-
-// }
 
 type TeacherList = Teacher & { subjects: Subject[] } & { classes: Class[] };
 
@@ -134,6 +123,11 @@ const Teachers = async ({
               some:{
                 classId : parseInt(value)
               }
+            };
+            break;
+          case "search":
+            query.name={
+              contains: value,mode: "insensitive"
             }
 
         }
@@ -144,13 +138,7 @@ const Teachers = async ({
 
   const [data, count] = await prisma.$transaction([
     prisma.teacher.findMany({
-      where: {
-        lessons: {
-          some: {
-            classId: parseInt(queryParams.classId!),
-          },
-        },
-      },
+      where: query,
       include: {
         subjects: true,
         classes: true,
