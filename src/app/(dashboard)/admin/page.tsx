@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import Announcement from "@/components/Announncement";
 import AttendanceChart from "@/components/AttendanceChart";
 import CountChart from "@/components/CountChart";
@@ -26,23 +26,21 @@ const AdminPage = () => {
           </div>
           {/* Attendance chart */}
           <div className="w-full lg:w-2/3 h-[450px]">
-            <AttendanceChart/>
+            <AttendanceChart />
           </div>
         </div>
 
         {/* bottom (charts) */}
         <div className="w-full h-[500px]">
-          <FinanceChart/>
+          <FinanceChart />
         </div>
-          {/* fees graph */}
-          
+        {/* fees graph */}
       </div>
 
       {/* right */}
       <div className="w-full lg:w-1/3 flex flex-col gap-8">
-      <EventCalendar/>
-      <Announcement/> 
-      
+        <EventCalendar />
+        <Announcement />
       </div>
     </div>
   );

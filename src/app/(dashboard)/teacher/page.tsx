@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import Announcement from "@/components/Announncement";
 import BigCalendar from "@/components/BigCalendar";
 import EventCalendar from "@/components/EventCalendar";

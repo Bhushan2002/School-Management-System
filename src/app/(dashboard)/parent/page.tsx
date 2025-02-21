@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import AnnouncementList from "../list/announcements/page";
 import Announcement from "@/components/Announncement";
 import BigCalendar from "@/components/BigCalendar";
+import { auth } from "@clerk/nextjs/server";
 
 
 
