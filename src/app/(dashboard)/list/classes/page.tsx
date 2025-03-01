@@ -3,14 +3,17 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { classesData, role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
+import { auth } from "@clerk/nextjs/server";
 import { Class, Prisma, Teacher } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 
 type ClassList = Class & { supervisor: Teacher };
+
+const {userId , sessionClaims} = await auth();
+const role = (sessionClaims?.metadata as {role?: string})?.role;
 
 const columns = [
   {
@@ -33,11 +36,11 @@ const columns = [
     accessor: "supervisor",
     className: "hidden md:table-cell",
   },
-  {
+  ...(role ==="admin"?[{
     header: "Actions",
     accessor: "action",
     className: "",
-  },
+  }]:[]),
 ];
 const renderRow = (item: ClassList) => (
   <tr
@@ -53,19 +56,12 @@ const renderRow = (item: ClassList) => (
 
     <td>
       <div className="flex items-center gap-2">
-        <Link href={`/dashboard/teachers/${item.id}`}>
-          <button className="w-8 h-8 flex items-center justify-center rounded-full  bg-secondaryElement ">
-            <Image
-              src="/edit.png"
-              width={16}
-              height={16}
-              alt=""
-              className="justify-center items-center"
-            />
-          </button>
-        </Link>
-
-        {role === "admin" && <FormModal table="class" type="delete" />}
+        {role === "admin" && 
+        (<>
+        <FormModal table="class" type="update" data={item} />
+        <FormModal table="class" type="delete" id={item.id}/>
+        </>)
+        }
       </div>
     </td>
   </tr>

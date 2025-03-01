@@ -2,13 +2,12 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { assignmentsData, role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
+import { auth } from "@clerk/nextjs/server";
 import { Assignment, Class, Prisma, Subject, Teacher } from "@prisma/client";
 import { attachReactRefresh } from "next/dist/build/webpack-config";
 import Image from "next/image";
-import Link from "next/link";
 
 type AssignmentType = Assignment & {
   lesson: {
@@ -17,6 +16,11 @@ type AssignmentType = Assignment & {
     class: Class;
   };
 };
+
+const { userId, sessionClaims } = await auth();
+
+const role = (sessionClaims?.metadata as {role?: string})?.role;
+const currentUserId =userId;
 
 const columns = [
   {
@@ -39,12 +43,14 @@ const columns = [
     accessor: "date",
     className: "hidden md:table-cell",
   },
-  {
+  ...(role ==='admin' || role ==='teacher' ? [{
     header: "Actions",
     accessor: "action",
     className: "",
-  },
+  }]:[]),
 ];
+
+
 
 const renderRow = (item: AssignmentType) => (
   <tr
@@ -62,19 +68,12 @@ const renderRow = (item: AssignmentType) => (
 
     <td>
       <div className="flex items-center gap-2">
-        <Link href={`/dashboard/teachers/${item.id}`}>
-          <button className="w-8 h-8 flex items-center justify-center rounded-full  bg-secondaryElement ">
-            <Image
-              src="/edit.png"
-              width={16}
-              height={16}
-              alt=""
-              className="justify-center items-center"
-            />
-          </button>
-        </Link>
-
-        {role === "admin" && <FormModal table="assignment" type="delete" />}
+      {(role === "admin" || role === "teacher") && (
+            <>
+              <FormModal table="assignment" type="update" data={item} />
+              <FormModal table="assignment" type="delete" id={item.id} />
+            </>
+          )}
       </div>
     </td>
   </tr>
@@ -89,7 +88,12 @@ const AssignmentsList = async ({
 
   // URL params Conditions
 
+ 
   const query: Prisma.AssignmentWhereInput = {};
+  
+  query.lesson = {};
+
+
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
       if (value !== undefined) {
@@ -112,6 +116,37 @@ const AssignmentsList = async ({
       }
     }
   }
+
+  //ROLE CONDITION
+  switch (role) {
+    case "admin":
+      break;
+    case "teacher":
+      query.lesson.teacherId = currentUserId!;
+      break;
+    case "student":
+      query.lesson.class = {
+        students: {
+          some: {
+            id: currentUserId!,
+          },
+        },
+      };
+      break;
+    case "parent":
+      query.lesson.class = {
+        students: {
+          some: {
+            parentId: currentUserId!,
+          },
+        },
+      };
+      break;
+    default:
+      break;
+  }
+
+
 
   const [data, count] = await prisma.$transaction([
     prisma.assignment.findMany({
@@ -171,8 +206,10 @@ const AssignmentsList = async ({
                 alt="Add"
                 className="justify-center items-center"
               />
-            </button>
-            {role === "admin" && <FormModal table="assignment" type="create" />}
+            </button> 
+            {role === "admin" || role === "teacher" && (
+              <FormModal table="assignment" type="create" />
+              )}
           </div>
         </div>
       </div>

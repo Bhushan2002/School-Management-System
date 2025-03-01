@@ -11,7 +11,6 @@ model Admin {
   id       String @id 
   username String @unique
 }
-
 model Student {
   id          String       @id
   username    String       @unique
@@ -74,10 +73,10 @@ model Grade {
 }
 
 model Class {
-  id       Int    @id @default(autoincrement())
-  name     String @unique
-  capacity Int
-  supervisorId  String?
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  capacity     Int
+  supervisorId String?
 
   supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
   lessons       Lesson[]

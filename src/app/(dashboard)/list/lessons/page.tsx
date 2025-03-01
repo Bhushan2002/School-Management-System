@@ -1,11 +1,11 @@
-
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { lessonsData, role } from "@/lib/data";
+
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
+import { auth } from "@clerk/nextjs/server";
 import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,11 @@ import Link from "next/link";
 type LessonList = Lesson & { class: Class } & { subject: Subject } & {
   teacher: Teacher;
 };
+
+const { userId, sessionClaims } = await auth();
+const role = (sessionClaims?.metadata as { role?: string })?.role;
+const currentUserId = userId;
+
 const renderRow = (item: LessonList) => (
   <tr
     key={item.id}
@@ -26,20 +31,11 @@ const renderRow = (item: LessonList) => (
 
     <td>
       <div className="flex items-center gap-2">
-        <Link href={`/dashboard/teachers/${item.id}`}>
-          <button className="w-8 h-8 flex items-center justify-center rounded-full  bg-secondaryElement ">
-            <Image
-              src="/edit.png"
-              width={16}
-              height={16}
-              alt=""
-              className="justify-center items-center"
-            />
-          </button>
-        </Link>
-
         {role === "admin" && (
-          <FormModal table="lesson" type="delete" id={item.id} />
+          <>
+            <FormModal table="lesson" type="update" data={item} />
+            <FormModal table="lesson" type="delete" id={item.id} />
+          </>
         )}
       </div>
     </td>
@@ -60,10 +56,14 @@ const columns = [
     accessor: "teacher",
     className: "hidden md:table-cell",
   },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(role === "admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
 const LessonLists = async ({

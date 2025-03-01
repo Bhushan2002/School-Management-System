@@ -6,6 +6,7 @@ import TableSearch from "@/components/TableSearch";
 import { role, studentsData, teachersData } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
+import { auth } from "@clerk/nextjs/server";
 import { Class, Prisma, Student, Subject } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,6 +25,9 @@ import Link from "next/link";
 // }
 
 type Students = Student & {class : Class}
+
+const { sessionClaims } = await auth();
+const role = (sessionClaims?.metadata as { role?: string })?.role;
 
 const columns = [
     {
@@ -51,11 +55,11 @@ const columns = [
         accessor: "address",
         className: "hidden md:table-cell"
     },
-    {
+    ...(role ==="admin"?[{
         header: "Actions",
         accessor: "action",
         className: "",
-    },
+    },]:[])
 ];
 
 const renderRow = (item:Student)=>(

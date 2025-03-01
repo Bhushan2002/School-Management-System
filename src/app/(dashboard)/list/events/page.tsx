@@ -2,15 +2,20 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { eventsData, role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Prisma } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { Event } from "@prisma/client";
+import { auth } from "@clerk/nextjs/server";
 
 type EventType = Event & { class: Class };
+
+const {userId , sessionClaims} = await auth();
+const role = (sessionClaims?.metadata as {role?:string})?.role;
+const currentUserId = userId;
+
 
 const columns = [
   {
@@ -39,11 +44,11 @@ const columns = [
     accessor: "endTime",
     className: "hidden md:table-cell",
   },
-  {
+  ...(role==="admin"?[{
     header: "Actions",
     accessor: "action",
     className: "",
-  },
+  }]:[]),
 ];
 
 const renderRow = (item: EventType) => (
@@ -73,20 +78,13 @@ const renderRow = (item: EventType) => (
 
     <td>
       <div className="flex items-center gap-2">
-        <Link href={`/dashboard/teachers/${item.id}`}>
-          <button className="w-8 h-8 flex items-center justify-center rounded-full  bg-secondaryElement ">
-            <Image
-              src="/edit.png"
-              width={16}
-              height={16}
-              alt=""
-              className="justify-center items-center"
-            />
-          </button>
-        </Link>
-
+       
         {role === "admin" && (
+          <>
+          
+          <FormModal table="result" type="update" data={item} />
           <FormModal table="result" type="delete" id={item.id} />
+          </>
         )}
       </div>
     </td>
@@ -120,6 +118,19 @@ const EventsList = async ({
     }
   }
 
+  
+  const roleConditions = {
+    teacher: { lessons: { some: { teacherId: currentUserId! } } },
+    student: { students: { some: { id: currentUserId! } } },
+    parent: { students: { some: { parentId: currentUserId! } } },
+  };
+
+  query.OR = [
+    { classId: null },
+    {
+      class: roleConditions[role as keyof typeof roleConditions] || {},
+    },
+  ];
   const [data, count] = await prisma.$transaction([
     prisma.event.findMany({
       where: query,
@@ -164,10 +175,9 @@ const EventsList = async ({
           </div>
         </div>
       </div>
-      {/* list*/}
+      {/* list  */}
 
       <Table columns={columns} renderRow={renderRow} data={data} />
-      {/* //2.24 */}
 
       {/* pagination */}
       <Pagination page={p} count={count} />

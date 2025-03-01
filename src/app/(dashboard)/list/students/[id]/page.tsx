@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 const SingleStudentPage = () => {
+  
   return (
     <div className="flex-1 p-4 flex flex-col gap-4 xl:flex-row">
       {/* LEFT */}
